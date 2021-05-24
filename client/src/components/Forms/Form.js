@@ -1,34 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Paper } from '@material-ui/core';
 import FileBase from 'react-file-base64';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import useStyles from './styles';
-import { createPost } from '../../store/actions/post';
+import { createPost, updatePost } from '../../store/actions/post';
 
-const Form = () => {
+const initialState = {
+    creator: '',
+    title: '',
+    message: '',
+    tags: [],
+    selectedFile: '',
+};
+
+const Form = ({ postId, setPostId }) => {
     const style = useStyles();
     const dispatch = useDispatch();
 
-    const [post, setPost] = useState({
-        creator: '',
-        title: '',
-        message: '',
-        tags: '',
-        selectedFile: '',
-    });
+    const [post, setPost] = useState(initialState);
+
+    const postData = useSelector((state) => (postId ? state.posts.find((_post) => _post._id === postId) : null));
+    useEffect(() => {
+        if (postData) setPost(postData);
+    }, [postData]);
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        dispatch(createPost(post));
+
+        if (postId) dispatch(updatePost(postId, post));
+        else dispatch(createPost(post));
+        clear();
     };
-    const clear = () => {};
-    const onChange = (e) => setPost({ ...post, [e.target.name]: e.target.value });
+    const clear = () => {
+        setPostId(null);
+        setPost(initialState);
+    };
+
+    const onChange = (e) => {
+        if (e.target.name === 'tags') {
+            setPost({ ...post, [e.target.name]: e.target.value.split(',') });
+        } else {
+            setPost({ ...post, [e.target.name]: e.target.value });
+        }
+    };
 
     return (
         <Paper className={style.paper}>
             <form autoComplete='off' noValidate className={`${style.root} ${style.form}`} onSubmit={handleSubmit}>
-                <Typography variant='h6'>Creating a Memory</Typography>
+                <Typography variant='h6'>{postId ? 'Editing' : 'Creating'} a Memory</Typography>
                 <TextField name='creator' variant='outlined' label='Creator' fullWidth value={post.creator} onChange={onChange} />
                 <TextField name='title' variant='outlined' label='Title' fullWidth value={post.title} onChange={onChange} />
                 <TextField name='message' variant='outlined' label='Message' fullWidth value={post.message} onChange={onChange} />

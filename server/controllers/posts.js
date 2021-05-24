@@ -1,24 +1,61 @@
+const mongoose = require('mongoose');
 const PostMessage = require('../models/postMessage');
 
 module.exports = {
     getPosts: async (req, res) => {
         try {
             const postMessages = await PostMessage.find();
-            return res.status(200).json(postMessages);
+            res.status(200).json(postMessages);
         } catch (error) {
-            return res.status(404).json({ message: error.message });
+            res.status(404).json({ message: error.message });
         }
     },
 
-    createPost: (req, res) => {
+    createPost: async (req, res) => {
         try {
             const post = req.body;
             const newPost = new PostMessage(post);
 
-            newPost.save();
-            return res.status(201).json(newPost);
+            await newPost.save();
+            res.status(201).json(newPost);
         } catch (error) {
-            return res.status(409).json({ message: error.message });
+            res.status(409).json({ message: error.message });
+        }
+    },
+
+    updatePost: async (req, res) => {
+        const { id: _id } = req.params;
+        const post = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send('Invalid Post id');
+
+        const updatedPost = await PostMessage.findByIdAndUpdate(_id, { ...post, _id }, { new: true });
+        res.status(200).json(updatedPost);
+    },
+
+    deletePost: async (req, res) => {
+        const { id: _id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send('Invalid Post id');
+        try {
+            await PostMessage.findOneAndDelete(_id);
+            res.status(200).json({ message: 'Post deleted successfully' });
+        } catch (error) {
+            res.status(404).json({ message: 'Unable to delete post' });
+        }
+    },
+
+    likePost: async (req, res) => {
+        const { id: _id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send('Invalid Post id');
+
+        try {
+            const post = await PostMessage.findById(_id);
+            const updatedPost = await PostMessage.findByIdAndUpdate(post._id, { likeCount: post.likeCount + 1 }, { new: true });
+
+            res.status(200).json(updatedPost);
+        } catch (error) {
+            console.log(error);
+            res.status(404).json({ message: 'Unable to update post like' });
         }
     },
 };

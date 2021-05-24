@@ -7,6 +7,7 @@ import thunk from 'redux-thunk';
 import App from './App';
 import reducers from './store/reducers';
 
+import './index.css';
 import reportWebVitals from './reportWebVitals';
 
 const store = createStore(reducers, compose(applyMiddleware(thunk)));
