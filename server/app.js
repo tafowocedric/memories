@@ -10,8 +10,10 @@ app.use(cors());
 
 // import routers
 const postRoutes = require('./routes/post');
+const userRoutes = require('./routes/user');
 
 // use routes
 app.use('/posts', postRoutes);
+app.use('/user', userRoutes);
 
 module.exports = app;

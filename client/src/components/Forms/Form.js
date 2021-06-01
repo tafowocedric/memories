@@ -7,7 +7,6 @@ import useStyles from './styles';
 import { createPost, updatePost } from '../../store/actions/post';
 
 const initialState = {
-    creator: '',
     title: '',
     message: '',
     tags: [],
@@ -17,6 +16,7 @@ const initialState = {
 const Form = ({ postId, setPostId }) => {
     const style = useStyles();
     const dispatch = useDispatch();
+    const user = JSON.parse(localStorage.getItem('profile'));
 
     const [post, setPost] = useState(initialState);
 
@@ -28,8 +28,8 @@ const Form = ({ postId, setPostId }) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        if (postId) dispatch(updatePost(postId, post));
-        else dispatch(createPost(post));
+        if (postId) dispatch(updatePost(postId, { ...post, name: user?.name }));
+        else dispatch(createPost({ ...post, name: user?.name }));
         clear();
     };
     const clear = () => {
@@ -45,11 +45,20 @@ const Form = ({ postId, setPostId }) => {
         }
     };
 
+    if (!user?.name) {
+        return (
+            <Paper className={style.paper}>
+                <Typography variant='h6' align='center'>
+                    Please Sign In to create your own memories and like other's memories.
+                </Typography>
+            </Paper>
+        );
+    }
+
     return (
         <Paper className={style.paper}>
             <form autoComplete='off' noValidate className={`${style.root} ${style.form}`} onSubmit={handleSubmit}>
                 <Typography variant='h6'>{postId ? 'Editing' : 'Creating'} a Memory</Typography>
-                <TextField name='creator' variant='outlined' label='Creator' fullWidth value={post.creator} onChange={onChange} />
                 <TextField name='title' variant='outlined' label='Title' fullWidth value={post.title} onChange={onChange} />
                 <TextField name='message' variant='outlined' label='Message' fullWidth value={post.message} onChange={onChange} />
                 <TextField name='tags' variant='outlined' label='Tags' fullWidth value={post.tags} onChange={onChange} />

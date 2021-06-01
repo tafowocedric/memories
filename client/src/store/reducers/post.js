@@ -2,7 +2,7 @@ import { FETCH_ALL, CREATE, UPDATE, DELETE } from '../constants/actionTypes';
 
 const initialState = [];
 
-const reducer = (state = initialState, { type, payload }) => {
+const postsReducer = (state = initialState, { type, payload }) => {
     switch (type) {
         case FETCH_ALL:
             return payload;
@@ -21,4 +21,4 @@ const reducer = (state = initialState, { type, payload }) => {
     }
 };
 
-export default reducer;
+export default postsReducer;
